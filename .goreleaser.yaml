@@ -1,0 +1,65 @@
+# goreleaser v2 — https://goreleaser.com
+version: 2
+
+project_name: claunch
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: claunch
+    main: .
+    binary: claunch
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/cameronsjo/claunch/cmd.version={{ .Version }}
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+
+# Homebrew tap (cask). Requires a PAT (HOMEBREW_TAP_TOKEN) with `repo` scope on
+# github.com/cameronsjo/homebrew-tap. Skipped automatically on snapshot builds.
+homebrew_casks:
+  - name: claunch
+    repository:
+      owner: cameronsjo
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/cameronsjo/claunch"
+    description: "Per-project launcher for Claude Code — cwd-resolved profiles, guided launch, then exec claude"
+    # Strip the quarantine xattr so the unsigned binary runs without a Gatekeeper prompt.
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/claunch"]
+          end
