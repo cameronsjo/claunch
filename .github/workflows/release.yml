@@ -18,12 +18,21 @@ jobs:
         with:
           go-version: stable
           cache: true
+      # Mint a short-lived token scoped to the Homebrew tap via the release
+      # GitHub App — no long-lived PAT. Requires the app installed with
+      # homebrew-tap access, plus RELEASE_APP_ID (variable) and
+      # RELEASE_APP_PRIVATE_KEY (secret) configured on this repo.
+      - name: Generate Homebrew tap token
+        id: tap-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          repositories: homebrew-tap
       - uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> v2"
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # PAT with `repo` scope on cameronsjo/homebrew-tap so goreleaser can
-          # push the regenerated formula. Without it, the brews step fails.
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ steps.tap-token.outputs.token }}
