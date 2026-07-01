@@ -1,3 +1,24 @@
+> [!IMPORTANT]
+> ## `claunch` has been absorbed into `forgectl` — this repository is archived
+>
+> The per-project Claude Code launcher now ships inside
+> **[forgectl](https://github.com/cameronsjo/forgectl)** as the **`forgectl launch`**
+> command group (alias `cl`), as of forgectl **v0.5.0**.
+>
+> ```sh
+> brew install cameronsjo/tap/forgectl
+> forgectl launch --help    # per-project launcher: pick model + New/Resume/Fork, then exec claude
+> forgectl launch which     # resolved profile for the current directory
+> ```
+>
+> Profiles moved to the `[launch]` section of forgectl's `config.toml`; a legacy
+> `~/.config/claunch/claunch.conf` is still read as a fallback. For muscle memory:
+> `alias claunch='forgectl launch'`.
+>
+> The content below is preserved for history.
+
+---
+
 # claunch
 
 **A per-project launcher for [Claude Code](https://github.com/anthropics/claude-code).**
